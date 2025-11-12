@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sapehive — Sign In / Sign Up (with 3D Logo)</title>
+<style>
+  :root{
+    --bg:#061226;
+    --panel:#07162b;
+    --glass: rgba(255,255,255,0.03);
+    --muted:#98b0c6;
+    --yellow:#ffcc00; /* Company yellow */
+    --card-w:420px;
+    --ease: cubic-bezier(.2,.9,.3,1);
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  html,body{height:100%;margin:0;background:
+    radial-gradient(900px 420px at 12% 12%, rgba(10,20,40,0.55), transparent 12%),
+    linear-gradient(180deg,#041224 0%, #061426 50%, #021018 100%); color:#eaf5ff;}
+
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px;}
+  .stage{display:flex;gap:36px;align-items:center;justify-content:center; width:calc(var(--card-w) + 480px); max-width:1200px;}
+
+  /* LEFT SCENE */
+  .scene{width:420px;height:520px;position:relative;perspective:1400px;display:flex;align-items:center;justify-content:center;}
+  .depth{
+    width:360px;height:480px;border-radius:26px;padding:18px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow: 0 30px 70px rgba(2,6,20,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    transform-style:preserve-3d; transition:transform 300ms var(--ease); position:relative; overflow:visible;
+  }
+  .glow{position:absolute; left:-40px; top:-80px; width:520px; height:520px; border-radius:50%; pointer-events:none; filter: blur(40px); opacity:.11; mix-blend-mode:screen; background: radial-gradient(circle at 30% 20%, rgba(255,204,0,0.95) 0%, rgba(255,204,0,0.12) 10%, transparent 40%); transform: translateZ(-60px);}
+
+  /* phone visuals (same as before) */
+  .phone { position:absolute; width:160px; height:320px; border-radius:20px; background:linear-gradient(180deg,#071827 0%, #071022 100%); box-shadow: 0 20px 50px rgba(1,8,20,0.6), 0 6px 18px rgba(0,0,0,0.5); display:flex;flex-direction:column;align-items:center;justify-content:flex-start; border: 2px solid rgba(255,255,255,0.03); transform-origin:center;}
+  .phone .screen{ width:84%;height:72%;margin-top:28px;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:var(--muted); font-size:13px; padding:12px; overflow:hidden;}
+  .phone.one{ left:28px; top:-36px; transform: rotateZ(-6deg) rotateY(-18deg) rotateX(6deg) translateZ(30px); animation: float1 7s ease-in-out infinite; }
+  .phone.two{ right:30px; top:-84px; transform: rotateZ(6deg) rotateY(22deg) rotateX(-6deg) translateZ(10px); animation: float2 6s ease-in-out infinite; }
+  @keyframes float1 {0%{ transform: translateY(-6px) rotateZ(-6deg) rotateY(-18deg) rotateX(6deg) translateZ(30px)}50%{ transform: translateY(18px) rotateZ(-4deg) rotateY(-18deg) rotateX(6deg) translateZ(30px) translateX(-8px)}100%{ transform: translateY(-6px) rotateZ(-6deg) rotateY(-18deg) rotateX(6deg) translateZ(30px)}}
+  @keyframes float2 {0%{ transform: translateY(0px) rotateZ(6deg) rotateY(22deg) rotateX(-6deg) translateZ(10px)}50%{ transform: translateY(26px) rotateZ(8deg) rotateY(22deg) rotateX(-6deg) translateZ(10px) translateX(12px)}100%{ transform: translateY(0px) rotateZ(6deg) rotateY(22deg) rotateX(-6deg) translateZ(10px)}}
+
+  .badge{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));position:absolute;font-size:13px;color:#dfeefc;border:1px solid rgba(255,255,255,0.02)}
+  .badge.editor{left:18px; bottom:22px; transform:translateZ(40px);}
+  .badge.camera{right:18px; bottom:18px; transform:translateZ(30px);}
+  .film{position:absolute; inset:12px; border-radius:18px; pointer-events:none; background-image: linear-gradient(90deg, rgba(255,255,255,0.01) 0%, transparent 40%), repeating-linear-gradient(90deg, rgba(255,255,255,0.01) 0 2px, transparent 2px 18px); transform: translateZ(-20px) scale(1.06); opacity:0.5;}
+
+  /* RIGHT: card and flip behavior */
+  .card-wrap{width:var(--card-w); perspective:1200px;}
+  .card { width:100%; border-radius:18px; padding:24px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: 0 30px 80px rgba(3,8,23,0.6); transform-style:preserve-3d; transition: transform 600ms var(--ease); }
+  .card-inner { width:100%; transform-origin:center; transition: transform 600ms var(--ease); }
+  .card-wrap.rotate .card-inner { transform: rotateY(180deg); }
+  .panel { backface-visibility: hidden; transform-style: preserve-3d; width:100%; }
+  .front, .back { position:relative; min-height:300px; padding:6px 0; border-radius:12px; }
+  .back { transform: rotateY(180deg); position:absolute; left:0; top:0; }
+
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  h2{margin:0;color:#f8fafc;font-size:20px}
+  .small{font-size:12px;color:#aabed0}
+  .lead{margin:6px 0 12px;color:var(--muted);font-size:13px}
+
+  /* ---------- 3D logo wrapper ---------- */
+  .logo-3d {
+    width:56px; height:56px; position:relative; display:inline-block; perspective:900px;
+  }
+  .logo-3d .logo-img {
+    width:56px; height:56px; display:block; border-radius:10px; object-fit:contain;
+    transform-style:preserve-3d; transition: transform 450ms var(--ease), box-shadow 450ms var(--ease);
+    transform: rotateX(14deg) rotateY(-16deg) translateZ(10px);
+    box-shadow: 0 20px 40px rgba(2,6,20,0.6), 0 6px 18px rgba(0,0,0,0.45);
+  }
+
+  /* colored extrusion behind the image to make it look like a solid 3D block */
+  .logo-3d::before{
+    content:"";
+    position:absolute; left:6px; top:6px; width:100%; height:100%; border-radius:10px;
+    background: linear-gradient(180deg, rgba(255,204,0,0.98), rgba(255,204,0,0.92));
+    transform: translateZ(-18px) rotateX(0deg) skewX(-8deg) scale(0.98);
+    z-index:-2; filter: blur(0.2px);
+    box-shadow: 0 28px 40px rgba(0,0,0,0.45);
+  }
+
+  /* subtle top highlight 'cap' for the block */
+  .logo-3d::after{
+    content:"";
+    position:absolute; left:0; top:0; right:0; height:28%;
+    background: linear-gradient(0deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
+    border-top-left-radius:10px; border-top-right-radius:10px;
+    transform: translateZ(12px);
+    z-index:2; pointer-events:none; mix-blend-mode:screen; opacity:0.9;
+  }
+
+  /* hover/active subtle lift */
+  .logo-3d:hover .logo-img { transform: rotateX(10deg) rotateY(-10deg) translateZ(14px) translateY(-2px); box-shadow: 0 26px 50px rgba(2,6,20,0.7); }
+
+  /* controls and inputs */
+  .toggleRow{display:flex;gap:8px;margin-bottom:12px}
+  .switchBtn{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer;font-weight:600}
+  .switchBtn.active{background:linear-gradient(90deg,var(--yellow),#ffd85a);color:#081022;box-shadow: 0 10px 30px rgba(255,204,0,0.12)}
+  form{display:block}
+  label{display:block;font-size:13px;color:var(--muted); margin-bottom:8px}
+  .field{display:flex;flex-direction:column;margin-bottom:12px}
+  input[type="text"],input[type="email"],input[type="password"],select{ padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#e8f1fb;outline:none;font-size:14px;}
+  .actions{display:flex;gap:12px;align-items:center;margin-top:12px}
+  .btn{padding:11px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--yellow),#ffd85a);color:#081025;font-weight:700;cursor:pointer;box-shadow: 0 8px 20px rgba(255,204,0,0.12);}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+  .sep{height:1px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.03));margin:14px 0;border-radius:2px}
+  input:focus{ box-shadow:0 8px 18px rgba(0,0,0,0.6) inset, 0 0 0 3px rgba(255,204,0,0.08); border-color: rgba(255,204,0,0.18) }
+
+  @media (max-width:980px){ .stage{flex-direction:column-reverse;width:100%} .scene{margin-bottom:14px} }
+  @media (max-width:480px){ :root{--card-w:92%} .phone{display:none} .logo-3d{width:46px;height:46px} .logo-3d .logo-img{width:46px;height:46px} }
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <!-- LEFT SCENE -->
+      <div class="scene" aria-hidden="true">
+        <div class="depth" id="depth">
+          <div class="glow" id="glow"></div>
+
+          <div class="phone one" aria-hidden="true">
+            <div class="screen" aria-hidden="true">
+              <div class="frame-highlight"></div>
+              <svg width="120" height="160" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="14" width="100" height="12" rx="6" fill="rgba(255,255,255,0.03)"/>
+                <rect x="10" y="40" width="88" height="10" rx="5" fill="#ffd85a"/>
+                <rect x="10" y="62" width="106" height="10" rx="5" fill="rgba(255,255,255,0.02)"/>
+                <rect x="10" y="86" width="56" height="10" rx="5" fill="#ffd85a"/>
+                <rect x="10" y="110" width="92" height="10" rx="5" fill="rgba(255,255,255,0.02)"/>
+                <circle cx="92" cy="122" r="10" fill="rgba(255,255,255,0.04)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="phone two" aria-hidden="true">
+            <div class="screen" aria-hidden="true">
+              <div class="frame-highlight"></div>
+              <div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center">
+                <div class="cam-ring" aria-hidden="true"><div class="inner" style="width:24px;height:24px;border-radius:50%;background:var(--yellow);box-shadow:0 6px 18px rgba(255,204,0,0.12);"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="badge editor" role="img" aria-label="Editor badge">
+            <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,0.14)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 11c1.656 0 3-1.567 3-3.5S10.656 4 9 4 6 5.567 6 7.5 7.344 11 9 11zm0 2c-2.481 0-7 1.24-7 3.72V20h14v-3.28C16 14.24 11.481 13 9 13z" fill="rgba(255,255,255,0.9)"/></svg>
+            </span>
+            Editor · Quick cuts
+          </div>
+
+          <div class="badge camera" role="img" aria-label="Cameraman badge">
+            <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,0.14)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 7h3l2-2h6l2 2h3v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" fill="rgba(255,255,255,0.95)"/></svg>
+            </span>
+            Cameraman · On location
+          </div>
+
+          <div class="film" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: auth card -->
+      <div class="card-wrap" id="cardWrap">
+        <div class="card">
+          <div class="card-inner" id="cardInner">
+            <!-- FRONT (Sign In) -->
+            <div class="panel front">
+              <div class="brand">
+                <!-- 3D logo inserted here: uses the uploaded file STARTUP LOGO.png -->
+                <div class="logo-3d" aria-hidden="true">
+                  <!-- Make sure the file STARTUP LOGO.png is in the same folder as this HTML -->
+                  <img class="logo-img" src="STARTUP LOGO.png" alt="Sapehive logo">
+                </div>
+                <div>
+                  <h2>Welcome back</h2>
+                  <div class="small">Sign in to manage jobs or find work</div>
+                </div>
+              </div>
+
+              <div class="toggleRow" role="tablist" aria-label="Auth switch">
+                <button class="switchBtn active" id="toSignIn">Sign In</button>
+                <button class="switchBtn" id="toSignUp">Sign Up</button>
+              </div>
+
+              <p class="lead">Sign in to your Sapehive account</p>
+
+              <form id="signInForm" autocomplete="on" novalidate>
+                <div class="field">
+                  <label for="si-email">Email</label>
+                  <input id="si-email" name="email" type="email" placeholder="you@company.com" required />
+                </div>
+                <div class="field">
+                  <label for="si-password">Password</label>
+                  <input id="si-password" name="password" type="password" placeholder="••••••••" minlength="6" required />
+                </div>
+
+                <div class="actions">
+                  <button type="submit" class="btn">Sign in</button>
+                  <button type="button" class="btn ghost" id="siDemo">Demo</button>
+                </div>
+
+                <div class="sep"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div class="muted"><input type="checkbox" id="remember" /> <label for="remember" class="small">Remember me</label></div>
+                  <a href="#" class="small">Forgot?</a>
+                </div>
+                <p class="small" style="margin-top:12px">No account? <a href="#" id="linkToSignUp">Create one</a></p>
+              </form>
+            </div>
+
+            <!-- BACK (Sign Up) -->
+            <div class="panel back" aria-hidden="true">
+              <div class="brand">
+                <div class="logo-3d" aria-hidden="true">
+                  <img class="logo-img" src="STARTUP LOGO.png" alt="Sapehive logo">
+                </div>
+                <div>
+                  <h2>Create account</h2>
+                  <div class="small">Join as editor, cameraman or client</div>
+                </div>
+              </div>
+
+              <div class="toggleRow" role="tablist" aria-label="Auth switch">
+                <button class="switchBtn" id="backToSignIn">Sign In</button>
+                <button class="switchBtn active" id="backToSignUp">Sign Up</button>
+              </div>
+
+              <p class="lead">Create a new Sapehive account</p>
+
+              <form id="signUpForm" autocomplete="on" novalidate>
+                <div class="field"><label for="su-name">Full name</label><input id="su-name" name="name" type="text" placeholder="Your full name" required /></div>
+                <div class="field"><label for="su-email">Email</label><input id="su-email" name="email" type="email" placeholder="you@company.com" required /></div>
+                <div class="field"><label for="su-role">Role</label><select id="su-role" name="role" required><option value="">Choose role</option><option value="editor">Editor</option><option value="cameraman">Cameraman</option><option value="client">Client</option></select></div>
+                <div class="field"><label for="su-password">Password</label><input id="su-password" name="password" type="password" placeholder="Create password" minlength="6" required /></div>
+
+                <div class="actions">
+                  <button type="submit" class="btn">Create account</button>
+                  <button type="button" class="btn ghost" id="suDemo">Demo</button>
+                </div>
+
+                <div class="sep"></div>
+                <p class="small" style="margin-top:12px">By creating an account you agree to our <a href="#">terms</a>.</p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+/* 3D tilt / parallax */
+(function () {
+  const depth = document.getElementById('depth');
+  const cardInner = document.getElementById('cardInner');
+  const glow = document.getElementById('glow');
+  function map(v,a,b,c,d){ return c + (d-c)*((v-a)/(b-a)); }
+  function handleMove(e){
+    const rect = depth.getBoundingClientRect();
+    const x = (e.clientX ?? (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY ?? (e.touches && e.touches[0].clientY)) - rect.top;
+    const rx = map(y, 0, rect.height, 12, -12);
+    const ry = map(x, 0, rect.width, -14, 14);
+    depth.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(6px)`;
+    glow.style.transform = `translate(${map(x,0,rect.width,-60,60)}px, ${map(y,0,rect.height,-60,60)}px) translateZ(-60px)`;
+    cardInner.style.transform = `translateZ(40px) rotateX(${rx*0.06}deg) rotateY(${ry*0.06}deg)`;
+  }
+  function reset(){ depth.style.transform = `rotateX(0deg) rotateY(0deg)`; glow.style.transform = `translateZ(-60px)`; cardInner.style.transform = `translateZ(40px)`; }
+  depth.addEventListener('mousemove', handleMove);
+  depth.addEventListener('touchmove', handleMove, {passive:true});
+  depth.addEventListener('mouseleave', reset);
+  depth.addEventListener('touchend', reset);
+  requestAnimationFrame(()=> { depth.style.transition = 'transform 500ms cubic-bezier(.2,.9,.3,1)'; cardInner.style.transition = 'transform 500ms cubic-bezier(.2,.9,.3,1)'; });
+})();
+
+/* Toggle Sign In / Sign Up */
+(function () {
+  const cardWrap = document.getElementById('cardWrap');
+  const toSignIn = document.getElementById('toSignIn');
+  const toSignUp = document.getElementById('toSignUp');
+  const backToSignIn = document.getElementById('backToSignIn');
+  const backToSignUp = document.getElementById('backToSignUp');
+  const linkToSignUp = document.getElementById('linkToSignUp');
+
+  function setActiveButtons(front){
+    toSignIn.classList.toggle('active', front);
+    toSignUp.classList.toggle('active', !front);
+    backToSignIn.classList.toggle('active', front);
+    backToSignUp.classList.toggle('active', !front);
+  }
+
+  function showSignIn(){ cardWrap.classList.remove('rotate'); setActiveButtons(true); }
+  function showSignUp(){ cardWrap.classList.add('rotate'); setActiveButtons(false); }
+
+  toSignIn.addEventListener('click', showSignIn);
+  toSignUp.addEventListener('click', showSignUp);
+  backToSignIn.addEventListener('click', showSignIn);
+  backToSignUp.addEventListener('click', showSignUp);
+  linkToSignUp.addEventListener('click', (e)=>{ e.preventDefault(); showSignUp(); });
+  showSignIn();
+})();
+
+/* Demo form handlers (replace TODOs with real fetch calls) */
+(function () {
+  const signInForm = document.getElementById('signInForm');
+  const signUpForm = document.getElementById('signUpForm');
+  const siDemo = document.getElementById('siDemo');
+  const suDemo = document.getElementById('suDemo');
+
+  signInForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('si-email').value.trim();
+    const password = document.getElementById('si-password').value;
+    if (!email || !password) { alert('Please enter email and password'); return; }
+    // TODO: call your backend: fetch('/api/auth/signin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }) })
+    alert('Demo sign-in success — ' + email);
+  });
+
+  signUpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('su-name').value.trim();
+    const email = document.getElementById('su-email').value.trim();
+    const role = document.getElementById('su-role').value;
+    const password = document.getElementById('su-password').value;
+    if (!name || !email || !role || !password) { alert('Please complete all required fields'); return; }
+    // TODO: call your backend: fetch('/api/auth/signup', ...)
+    alert('Demo account created — ' + name + ' (' + role + ')');
+    document.getElementById('toSignIn').click();
+  });
+
+  siDemo.addEventListener('click', () => {
+    document.getElementById('si-email').value = 'demo@sapehive.com';
+    document.getElementById('si-password').value = 'demo1234';
+    signInForm.dispatchEvent(new Event('submit', {cancelable:true}));
+  });
+  suDemo.addEventListener('click', () => {
+    document.getElementById('su-name').value = 'Demo User';
+    document.getElementById('su-email').value = 'demo@sapehive.com';
+    document.getElementById('su-role').value = 'editor';
+    document.getElementById('su-password').value = 'demo1234';
+    signUpForm.dispatchEvent(new Event('submit', {cancelable:true}));
+  });
+})();
+</script>
+</body>
+</html>
